@@ -146,6 +146,8 @@ slight_DebugMenu myDebugMenu(Serial, Serial, 15);
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // LEDBoard
 
+bool output_enabled = true;
+
 const uint8_t boards_count = 1;
 
 const uint8_t chips_per_board = 4;
@@ -175,17 +177,47 @@ const uint8_t tlc_channels_total = (uint8_t)(tlc_chips * tlc_channels);
 
 Tlc59711 tlc(tlc_chips);
 
-bool output_enabled = true;
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// FaderLin
 
-// mounting sun specials
-// const uint8_t boards_count_sun_arms = (6 * 4);
-// const uint8_t boards_count_sun_center = (3 + 4 + 4 + 3);
-const uint8_t boards_count_sun_arms = (3 * 4);
-const uint8_t boards_count_sun_center = (3 + 0 + 0 + 0);
-const uint8_t boards_count_sun = boards_count_sun_arms + boards_count_sun_center;
-const uint16_t colorchannels_mounting_sun =  (colorchannels_per_board*boards_count_sun);
-const uint16_t colorchannels_mounting_sun_center =  (colorchannels_per_board*boards_count_sun_center);
+const uint8_t myFaderRGB__channel_count = colors_per_led;
+slight_FaderLin myFaderRGB(
+    0, // byte cbID_New
+    myFaderRGB__channel_count, // byte cbChannelCount_New
+    myFaderRGB_callback_OutputChanged, // tCbfuncValuesChanged cbfuncValuesChanged_New
+    myCallback_onEvent // tCbfuncStateChanged cbfuncStateChanged_New
+);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// button
+
+const uint8_t button_pin = 7;
+const uint8_t button_pin_2 = 8;
+
+slight_ButtonInput button(
+    0,  // byte cbID_New
+    button_pin,  // byte cbPin_New,
+    button_getInput,  // tCbfuncGetInput cbfuncGetInput_New,
+    button_onEvent,  // tcbfOnEvent cbfCallbackOnEvent_New,
+      30,  // const uint16_t cwDuration_Debounce_New = 30,
+     500,  // const uint16_t cwDuration_HoldingDown_New = 1000,
+      50,  // const uint16_t cwDuration_ClickSingle_New =   50,
+     500,  // const uint16_t cwDuration_ClickLong_New =   3000,
+     500   // const uint16_t cwDuration_ClickDouble_New = 1000
+);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// lowbat
+
+const uint8_t bat_voltage_pin = A0;
+// const uint8_t lowbat_warning_pin = 3;
+
+// 420 == 4.2V
+uint16_t bat_voltage = 420;
+
+uint32_t lowbat_timestamp_last = millis();
+uint32_t lowbat_interval = 1000;
 
 
 
@@ -231,50 +263,6 @@ const uint16_t trail[trail_count][colors_per_led] {
     { 55000, 20000,      0},
 };
 
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// FaderLin
-
-const uint8_t myFaderRGB__channel_count = colors_per_led;
-slight_FaderLin myFaderRGB(
-    0, // byte cbID_New
-    myFaderRGB__channel_count, // byte cbChannelCount_New
-    myFaderRGB_callback_OutputChanged, // tCbfuncValuesChanged cbfuncValuesChanged_New
-    myCallback_onEvent // tCbfuncStateChanged cbfuncStateChanged_New
-);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// button
-
-const uint8_t button_pin = 7;
-const uint8_t button_pin_2 = 8;
-
-slight_ButtonInput button(
-    0,  // byte cbID_New
-    button_pin,  // byte cbPin_New,
-    button_getInput,  // tCbfuncGetInput cbfuncGetInput_New,
-    button_onEvent,  // tcbfOnEvent cbfCallbackOnEvent_New,
-      30,  // const uint16_t cwDuration_Debounce_New = 30,
-     500,  // const uint16_t cwDuration_HoldingDown_New = 1000,
-      50,  // const uint16_t cwDuration_ClickSingle_New =   50,
-     500,  // const uint16_t cwDuration_ClickLong_New =   3000,
-     500   // const uint16_t cwDuration_ClickDouble_New = 1000
-);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// lowbat
-
-const uint8_t bat_voltage_pin = A0;
-const uint8_t lowbat_warning_pin = 3;
-
-// dig  == A0   == Bat
-// 1024 == 5.0V == 10.0V
-// x    == 3.1V ==  6.2V
-// x = 635
-uint16_t bat_voltage = 420;
-
-uint32_t lowbat_timestamp_last = millis();
-uint32_t lowbat_interval = 1000;
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1531,12 +1519,12 @@ void lowbat_check() {
 
         if (bat_voltage > 340) {
             output_enabled = true;
-            digitalWrite(lowbat_warning_pin, HIGH);
+            // digitalWrite(lowbat_warning_pin, HIGH);
             // Serial.println(F("--> output enabled"));
         } else if (bat_voltage <= 310) {
             // force off
             output_enabled = false;
-            digitalWrite(lowbat_warning_pin, LOW);
+            // digitalWrite(lowbat_warning_pin, LOW);
             tlc.setRGB(0, 0, 0);
             tlc.write();
             Serial.println(F("--> output disabled"));
@@ -1562,8 +1550,8 @@ void setup() {
         pinMode(infoled_pin, OUTPUT);
         digitalWrite(infoled_pin, HIGH);
 
-        pinMode(lowbat_warning_pin, OUTPUT);
-        digitalWrite(lowbat_warning_pin, HIGH);
+        // pinMode(lowbat_warning_pin, OUTPUT);
+        // digitalWrite(lowbat_warning_pin, HIGH);
 
         // as of arduino 1.0.1 you can use INPUT_PULLUP
 
@@ -1621,6 +1609,9 @@ void setup() {
     out.println(F("setup button:")); {
         out.println(F("\t set button pin"));
         pinMode(button_pin, INPUT_PULLUP);
+        // use second pin as GND for button:
+        pinMode(button_pin_2, OUTPUT);
+        digitalWrite(button_pin_2, LOW);
         out.println(F("\t button begin"));
         button.begin();
     }
