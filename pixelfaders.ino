@@ -152,56 +152,54 @@ void pixelfaders_fadeTo(
     values[0] = r;
     values[1] = g;
     values[2] = b;
-    pixelfaders_faders[i].startFadeTo(duration, values);
+    pixelfaders_faders[pixelid].startFadeTo(duration, values);
 }
 
-
-
+void pixelfaders_wait_for_fade() {
+    bool fading_all_done = false;
+    while (!fading_all_done) {
+        fading_all_done = true;
+        for (size_t i = 0; i < leds_count; i++) {
+            if (
+                pixelfaders_faders[i].update() == slight_FaderLin::state_Fading
+                // pixelfaders_faders[i].update() == slight_FaderLin::state_Standby
+            ) {
+                fading_all_done = false;
+            }
+        }
+    }
+    for (size_t i = 0; i < leds_count; i++) {
+        pixelfaders_faders[i].update();
+    }
+}
 
 void pixelfaders_init(Print &out) {
     out.println(F("setup pixelFaders:"));
 
     out.println(F("\t begin();"));
     for (size_t i = 0; i < leds_count; i++) {
-        pixelfaders_faders[i].begin()
+        pixelfaders_faders[i].begin();
     }
 
     out.println(F("\t welcome fade"));
-    for (size_t i = 0; i < leds_count; i++) {
-        pixelfaders_faders[i].begin()
-    }
-    // myFaderRGB.startFadeTo( 1000, memList_A[memList_A__Full]);
-    myFaderRGB_fadeTo(1000, 60000, 60000, 0);
-    // run fading
-    // while ( myFaderRGB.getLastEvent() == slight_FaderLin::event_fading_Finished) {
-    //     myFaderRGB.update();
-    // }
-    while ( myFaderRGB.update() == slight_FaderLin::state_Fading) {
-        // nothing to do.
-    }
-    myFaderRGB.update();
-
-    // myFaderRGB.startFadeTo( 1000, memList_A[memList_A__Off]);
-    myFaderRGB_fadeTo(1000, 1000, 500, 1);
-    // run fading
-    // while ( myFaderRGB.getLastEvent() != slight_FaderLin::event_fading_Finished) {
-    //     myFaderRGB.update();
-    // }
-    while ( myFaderRGB.update() == slight_FaderLin::state_Fading) {
-        // nothing to do.
-    }
-    myFaderRGB.update();
-
-    // myFaderRGB.startFadeTo( 1000, memList_A[memList_A__Off]);
-    myFaderRGB_fadeTo(1000, 0, 0, 1);
-    // run fading
-    // while ( myFaderRGB.getLastEvent() != slight_FaderLin::event_fading_Finished) {
-    //     myFaderRGB.update();
-    // }
-    while ( myFaderRGB.update() == slight_FaderLin::state_Fading) {
-        // nothing to do.
-    }
-    myFaderRGB.update();
+    pixelfaders_welcome_fade();
 
     out.println(F("\t finished."));
+}
+
+void pixelfaders_welcome_fade() {
+    for (size_t i = 0; i < leds_count; i++) {
+        pixelfaders_fadeTo(i , 1000, 60000, 60000, 0);
+    }
+    pixelfaders_wait_for_fade();
+
+    for (size_t i = 0; i < leds_count; i++) {
+        pixelfaders_fadeTo(i , 1000, 1000, 500, 1);
+    }
+    pixelfaders_wait_for_fade();
+
+    for (size_t i = 0; i < leds_count; i++) {
+        pixelfaders_fadeTo(i , 1000, 0, 0, 1);
+    }
+    pixelfaders_wait_for_fade();
 }
