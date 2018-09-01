@@ -1,0 +1,101 @@
+#ifndef PIXELFADERS_H_
+#define PIXELFADERS_H_
+
+#include <Arduino.h>
+
+#include <slight_FaderLin.h>
+
+#include "./ledboard.h"
+
+void pixelFader_callback_OutputChanged(uint8_t id, uint16_t *values, uint8_t count);
+void pixelFader_callback_onEvent(slight_FaderLin *pInstance, byte event);
+
+// const slight_FaderLin pixelFaders[leds_count] = {
+const slight_FaderLin pixelFaders[16] = {
+    slight_FaderLin(
+        // byte cbID_New
+        0,
+        // byte cbChannelCount_New
+        colors_per_led,
+        // tCbfuncValuesChanged cbfuncValuesChanged_New
+        pixelFader_callback_OutputChanged,
+        // tCbfuncStateChanged cbfuncStateChanged_New
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        1,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        2,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        3,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        4,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        5,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        6,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        7,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        8,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        9,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        10,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        11,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        12,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        13,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        14,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+    slight_FaderLin(
+        15,
+        colors_per_led,
+        pixelFader_callback_OutputChanged,
+        pixelFader_callback_onEvent),
+};
+
+#endif  // PIXELFADERS_H_

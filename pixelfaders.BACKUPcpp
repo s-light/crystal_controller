@@ -1,0 +1,62 @@
+
+#include <Arduino.h>
+
+#include <slight_FaderLin.h>
+
+#include "./pixelfaders.h"
+
+#include "./ledboard.h"
+
+void pixelFader_callback_OutputChanged(uint8_t id, uint16_t *values, uint8_t count) {
+    // if (bDebugOut_myFaderRGB_Output_Enable) {
+    //     Serial.print(F("OutputValue: "));
+    //     printArray_uint16(Serial, wValues, bCount);
+    //     Serial.println();
+    // }
+
+    // for (size_t channel_index = 0; channel_index < count; channel_index++) {
+    //     tlc.setChannel(channel_index, values[channel_index]);
+    // }
+
+    if (output_enabled) {
+        tlc.setRGB(values[0], values[1], values[2]);
+        tlc.write();
+    }
+}
+
+
+void pixelFader_callback_onEvent(slight_FaderLin *pInstance, byte event) {
+    // Serial.print(F("Instance ID:"));
+    // Serial.println((*pInstance).getID());
+    //
+    // Serial.print(F("Event: "));
+    // (*pInstance).printEvent(Serial, event);
+    // Serial.println();
+
+    // react on events:
+    switch (event) {
+        case slight_FaderLin::event_StateChanged : {
+            // Serial.print(F("slight_FaderLin "));
+            // Serial.print((*pInstance).getID());
+            // Serial.println(F(" : "));
+            // Serial.print(F("\t state: "));
+            // (*pInstance).printState(Serial);
+            // Serial.println();
+
+            // switch (state) {
+            //     case slight_FaderLin::state_Standby : {
+            //             //
+            //         } break;
+            //     case slight_FaderLin::state_Fading : {
+            //             //
+            //         } break;
+            //     case slight_FaderLin::state_Finished : {
+            //             //
+            //         } break;
+            // }  // end switch
+        } break;
+        case slight_FaderLin::event_fading_Finished : {
+            // Serial.print(F("\t fading Finished."));
+        } break;
+    }  // end switch
+}

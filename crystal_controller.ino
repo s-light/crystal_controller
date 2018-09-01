@@ -75,6 +75,8 @@
 
 #include <Tlc59711.h>
 
+#include "./ledboard.h"
+// #include "./pixelfaders.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Info
@@ -145,49 +147,22 @@ slight_DebugMenu myDebugMenu(Serial, Serial, 15);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // LEDBoard
-
-bool output_enabled = true;
-
-const uint8_t boards_count = 1;
-
-const uint8_t chips_per_board = 4;
-
-const uint8_t colors_per_led = 3;
-const uint8_t leds_per_chip = 4;
-
-const uint8_t colorchannels_per_board = (
-    colors_per_led * leds_per_chip * chips_per_board
-);
-
-const uint8_t leds_per_row = 4;
-const uint8_t leds_per_column = 4;
-
-const uint8_t channel_position_map[leds_per_column][leds_per_row] = {
-    { 0,  1,  4,  5},
-    { 2,  3,  6,  7},
-    { 8,  9, 12, 13},
-    {10, 11, 14, 15},
-};
-
-// tlc info
-const uint8_t tlc_channels = colors_per_led * leds_per_chip;
-const uint8_t tlc_channels_per_board = tlc_channels * chips_per_board;
-const uint8_t tlc_chips = boards_count * chips_per_board;
-const uint8_t tlc_channels_total = (uint8_t)(tlc_chips * tlc_channels);
-
-Tlc59711 tlc(tlc_chips);
+// see ledboard.h
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // FaderLin
 
-const uint8_t myFaderRGB__channel_count = colors_per_led;
 slight_FaderLin myFaderRGB(
     0, // byte cbID_New
-    myFaderRGB__channel_count, // byte cbChannelCount_New
+    colors_per_led, // byte cbChannelCount_New
     myFaderRGB_callback_OutputChanged, // tCbfuncValuesChanged cbfuncValuesChanged_New
     myCallback_onEvent // tCbfuncStateChanged cbfuncStateChanged_New
 );
+
+// see pixelfaders.h
+// see pixelfaders.ino
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // button
@@ -978,116 +953,6 @@ void calculate_step__horizontal4() {
 }
 
 
-//
-// void calculate_step__sun_spiral_center() {
-//     // Serial.println("calculate_step__sun_spiral_center: ");
-//
-//     const uint8_t column_count = leds_per_row*3;
-//     const uint8_t row_count = leds_per_column*1;
-//     const uint8_t spiral_order[row_count][column_count] {
-//         { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11},
-//         {13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 12},
-//         {12, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13},
-//         {11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0},
-//     };
-//
-//     uint16_t ch_offset = colorchannels_per_board * boards_count_sun_arms;
-//
-//     for (size_t row = 0; row < row_count; row++) {
-//         for (size_t column = 0; column < column_count; column++) {
-//
-//
-//             // Serial.print("step ");
-//             // Serial.print(sequencer_current_step);
-//             // Serial.print("; r");
-//             // Serial.print(row);
-//             // Serial.print("; c");
-//             // Serial.print(column);
-//
-//             uint8_t pixel = 0;
-//             uint16_t ch = 0;
-//
-//             if ((column < leds_per_row) && (row < leds_per_column)) {
-//                 // first board
-//                 pixel = channel_position_map[row][column];
-//                 ch = pixel * 3;
-//             }
-//             else {
-//                 // second board
-//                 uint8_t board_column = column;
-//                 uint8_t board_row = row;
-//
-//                 if (column >= leds_per_row) {
-//                     board_column = column % leds_per_row;
-//                 }
-//                 if (row >= leds_per_column) {
-//                     board_row = row % leds_per_column;
-//                 }
-//
-//                 // Serial.print("; br: ");
-//                 // Serial.print(board_row);
-//                 // Serial.print("; bc: ");
-//                 // Serial.print(board_column);
-//
-//                 // calculate board offset count
-//                 uint8_t boards_offset_column = (column / leds_per_row);
-//                 uint8_t boards_offset_row = (row / leds_per_column);
-//                 uint8_t boards_offset = boards_offset_column + boards_offset_row;
-//
-//                 pixel = channel_position_map[board_row][board_column];
-//                 ch = pixel * 3;
-//                 // Serial.print("; ch: ");
-//                 // Serial.print(ch);
-//
-//                 ch = ch + (colorchannels_per_board * boards_offset);
-//                 // Serial.print("; ch: ");
-//                 // Serial.print(ch);
-//
-//                 // Serial.print("; ch_offset: ");
-//                 // Serial.print(ch_offset + );
-//             }
-//
-//             uint8_t spiral_step = spiral_order[row][column];
-//
-//             // trail
-//             int8_t trail_step = spiral_step - sequencer_current_step;
-//
-//             if (!sequencer_direction_forward) {
-//                 // change trail direction
-//                 trail_step = trail_count - trail_step;
-//             }
-//
-//             // Serial.print("; ch: ");
-//             // Serial.print(ch);
-//
-//             // add offset for center panels
-//             ch = ch_offset + ch;
-//
-//             // Serial.print("; ch_offset: ");
-//             // Serial.print(ch_offset);
-//             // Serial.print("; ch: ");
-//             // Serial.print(ch);
-//             // Serial.println();
-//
-//             if ((trail_step >= 0) && (trail_step < trail_count)) {
-//                 tlc.setChannel(ch + 0, trail[trail_step][0]);
-//                 tlc.setChannel(ch + 1, trail[trail_step][1]);
-//                 tlc.setChannel(ch + 2, trail[trail_step][2]);
-//             }
-//             else {
-//                 // set pixel to low
-//                 tlc.setChannel(ch + 0, 0);
-//                 tlc.setChannel(ch + 1, 0);
-//                 tlc.setChannel(ch + 2, 0);
-//             }
-//
-//             // Serial.println();
-//
-//         }
-//     }
-// }
-//
-
 
 void calculate_step_singleboard() {
     // Serial.print("calculate_step: ");
@@ -1323,7 +1188,7 @@ void myFaderRGB_callback_OutputChanged(uint8_t id, uint16_t *values, uint8_t cou
 }
 
 void myFaderRGB_fadeTo(uint16_t duration, uint16_t r, uint16_t g, uint16_t b) {
-    uint16_t values[myFaderRGB__channel_count];
+    uint16_t values[colors_per_led];
     // init array with 0
     values[0] = r;
     values[1] = g;
