@@ -153,13 +153,6 @@ slight_DebugMenu myDebugMenu(Serial, Serial, 15);
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // FaderLin
 
-slight_FaderLin myFaderRGB(
-    0, // byte cbID_New
-    colors_per_led, // byte cbChannelCount_New
-    myFaderRGB_callback_OutputChanged, // tCbfuncValuesChanged cbfuncValuesChanged_New
-    myCallback_onEvent // tCbfuncStateChanged cbfuncStateChanged_New
-);
-
 // see pixelfaders.h
 // see pixelfaders.ino
 
@@ -1125,120 +1118,6 @@ void map_to_alldualBoards(uint8_t boards_count_local) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // FaderLin
 
-void setup_myFaderRGB(Print &out) {
-    out.println(F("setup myFaderRGB:"));
-
-    out.println(F("\t myFaderRGB.begin();"));
-    myFaderRGB.begin();
-
-    out.println(F("\t myFaderRGB welcome fade"));
-    // myFaderRGB.startFadeTo( 1000, memList_A[memList_A__Full]);
-    myFaderRGB_fadeTo(1000, 60000, 60000, 0);
-    // run fading
-    // while ( myFaderRGB.getLastEvent() == slight_FaderLin::event_fading_Finished) {
-    //     myFaderRGB.update();
-    // }
-    while ( myFaderRGB.update() == slight_FaderLin::state_Fading) {
-        // nothing to do.
-    }
-    myFaderRGB.update();
-
-    // myFaderRGB.startFadeTo( 1000, memList_A[memList_A__Off]);
-    myFaderRGB_fadeTo(1000, 1000, 500, 1);
-    // run fading
-    // while ( myFaderRGB.getLastEvent() != slight_FaderLin::event_fading_Finished) {
-    //     myFaderRGB.update();
-    // }
-    while ( myFaderRGB.update() == slight_FaderLin::state_Fading) {
-        // nothing to do.
-    }
-    myFaderRGB.update();
-
-    // myFaderRGB.startFadeTo( 1000, memList_A[memList_A__Off]);
-    myFaderRGB_fadeTo(1000, 0, 0, 1);
-    // run fading
-    // while ( myFaderRGB.getLastEvent() != slight_FaderLin::event_fading_Finished) {
-    //     myFaderRGB.update();
-    // }
-    while ( myFaderRGB.update() == slight_FaderLin::state_Fading) {
-        // nothing to do.
-    }
-    myFaderRGB.update();
-
-    out.println(F("\t finished."));
-}
-
-void myFaderRGB_callback_OutputChanged(uint8_t id, uint16_t *values, uint8_t count) {
-
-    // if (bDebugOut_myFaderRGB_Output_Enable) {
-    //     Serial.print(F("OutputValue: "));
-    //     printArray_uint16(Serial, wValues, bCount);
-    //     Serial.println();
-    // }
-
-    // for (size_t channel_index = 0; channel_index < count; channel_index++) {
-    //     tlc.setChannel(channel_index, values[channel_index]);
-    // }
-
-    if (output_enabled) {
-        tlc.setRGB(values[0], values[1], values[2]);
-        tlc.write();
-    }
-
-}
-
-void myFaderRGB_fadeTo(uint16_t duration, uint16_t r, uint16_t g, uint16_t b) {
-    uint16_t values[colors_per_led];
-    // init array with 0
-    values[0] = r;
-    values[1] = g;
-    values[2] = b;
-    myFaderRGB.startFadeTo(duration, values);
-}
-
-void myCallback_onEvent(slight_FaderLin *pInstance, byte event) {
-
-
-    // Serial.print(F("Instance ID:"));
-    // Serial.println((*pInstance).getID());
-    //
-    // Serial.print(F("Event: "));
-    // (*pInstance).printEvent(Serial, event);
-    // Serial.println();
-
-
-    // react on events:
-    switch (event) {
-        case slight_FaderLin::event_StateChanged : {
-            // Serial.print(F("slight_FaderLin "));
-            // Serial.print((*pInstance).getID());
-            // Serial.println(F(" : "));
-            // Serial.print(F("\t state: "));
-            // (*pInstance).printState(Serial);
-            // Serial.println();
-
-            // switch (state) {
-            //     case slight_FaderLin::state_Standby : {
-            //             //
-            //         } break;
-            //     case slight_FaderLin::state_Fading : {
-            //             //
-            //         } break;
-            //     case slight_FaderLin::state_Finished : {
-            //             //
-            //         } break;
-            // } //end switch
-
-
-        } break;
-
-        case slight_FaderLin::event_fading_Finished : {
-            // Serial.print(F("\t fading Finished."));
-        } break;
-    } //end switch
-
-}
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // button callbacks
 
@@ -1275,34 +1154,34 @@ void button_onEvent(slight_ButtonInput *pInstance, byte bEvent) {
             Serial.println(F("duration active: "));
             Serial.println(duration);
             if (duration <= 2000) {
-                myFaderRGB_fadeTo(500, 10000, 0, 0);
+                pixelfaders_fadeTo_all(500, 10000, 0, 0);
             }
             else if (duration <= 3000) {
-                myFaderRGB_fadeTo(500, 0, 10000, 0);
+                pixelfaders_fadeTo_all(500, 0, 10000, 0);
             }
             else if (duration <= 4000) {
-                myFaderRGB_fadeTo(500, 0, 0, 10000);
+                pixelfaders_fadeTo_all(500, 0, 0, 10000);
             }
             else if (duration <= 6000) {
-                myFaderRGB_fadeTo(500, 0, 65000, 65000);
+                pixelfaders_fadeTo_all(500, 0, 65000, 65000);
             }
             else if (duration <= 7000) {
-                myFaderRGB_fadeTo(500, 65000, 0, 65000);
+                pixelfaders_fadeTo_all(500, 65000, 0, 65000);
             }
             else if (duration <= 8000) {
-                myFaderRGB_fadeTo(500, 65535, 65535, 0);
+                pixelfaders_fadeTo_all(500, 65535, 65535, 0);
             }
             else if (duration <= 9000) {
-                myFaderRGB_fadeTo(1000, 65535, 65535, 65535);
+                pixelfaders_fadeTo_all(1000, 65535, 65535, 65535);
             }
             else {
-                myFaderRGB_fadeTo(1000, 65535, 65535, 65535);
+                pixelfaders_fadeTo_all(1000, 65535, 65535, 65535);
             }
 
         } break;
         case slight_ButtonInput::event_Up : {
             Serial.println(F("up"));
-            myFaderRGB_fadeTo(1000, 0, 0, 1);
+            pixelfaders_fadeTo_all(1000, 0, 0, 1);
         } break;
         case slight_ButtonInput::event_Click : {
             // Serial.println(F("FRL click"));
@@ -1481,7 +1360,7 @@ void setup() {
     out.print(F("# Free RAM = "));
     out.println(freeRam());
 
-    setup_myFaderRGB(out);
+    pixelfaders_init(out);
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // setup button
@@ -1537,7 +1416,8 @@ void loop() {
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // update sub parts
 
-        myFaderRGB.update();
+        pixelfaders_update();
+        
         button.update();
 
         lowbat_check();

@@ -87,20 +87,57 @@ const slight_FaderLin pixelfaders_faders[leds_count] = {
 };
 
 
-void pixelFader_callback_OutputChanged(uint8_t id, uint16_t *values, uint8_t count) {
+void pixelFader_callback_OutputChanged(uint8_t pixelid, uint16_t *values, uint8_t count) {
     // if (bDebugOut_myFaderRGB_Output_Enable) {
     //     Serial.print(F("OutputValue: "));
     //     printArray_uint16(Serial, wValues, bCount);
     //     Serial.println();
     // }
 
-    // for (size_t channel_index = 0; channel_index < count; channel_index++) {
-    //     tlc.setChannel(channel_index, values[channel_index]);
-    // }
-
     if (output_enabled) {
-        tlc.setRGB(values[0], values[1], values[2]);
-        tlc.write();
+
+        uint8_t pixel = 0;
+        uint8_t ch = 0;
+
+        // if ((column < leds_per_row) && (row < leds_per_column)) {
+        //     // first board
+        //     pixel = channel_position_map[row][column];
+        //     ch = pixel * 3;
+        // }
+        // else {
+        //     // second board
+        //     uint8_t board_column = column;
+        //     uint8_t board_row = row;
+        //
+        //     if (column >= leds_per_row) {
+        //         board_column = column % leds_per_row;
+        //     }
+        //     if (row >= leds_per_column) {
+        //         board_row = row % leds_per_column;
+        //     }
+        //
+        //     // Serial.print("; br: ");
+        //     // Serial.print(board_row);
+        //     // Serial.print("; bc: ");
+        //     // Serial.print(board_column);
+        //
+        //     pixel = channel_position_map[board_row][board_column];
+        //     ch = pixel * 3;
+        //     // Serial.print("; ch: ");
+        //     // Serial.print(ch);
+        //
+        //     ch = ch + colorchannels_per_board;
+        // }
+
+        ch = pixelid * 3;
+
+        // tlc.setRGB(values[0], values[1], values[2]);
+        tlc.setChannel(ch + 0, values[0]);
+        tlc.setChannel(ch + 1, values[1]);
+        tlc.setChannel(ch + 2, values[2]);
+
+        // this is handled in pixelfaders_update()
+        // tlc.write();
     }
 }
 
@@ -137,6 +174,7 @@ void pixelFader_callback_onEvent(slight_FaderLin *pInstance, byte event) {
         } break;
         case slight_FaderLin::event_fading_Finished : {
             // Serial.print(F("\t fading Finished."));
+            // (*pInstance).getID()
         } break;
     }  // end switch
 }
@@ -154,6 +192,26 @@ void pixelfaders_fadeTo(
     values[2] = b;
     pixelfaders_faders[pixelid].startFadeTo(duration, values);
 }
+
+void pixelfaders_fadeTo_all(
+    uint16_t duration, uint16_t r, uint16_t g, uint16_t b
+) {
+    for (size_t i = 0; i < leds_count; i++) {
+        pixelfaders_fadeTo(i , duration, r, g, b);
+    }
+}
+
+
+
+void pixelfaders_update() {
+    for (size_t i = 0; i < leds_count; i++) {
+        pixelfaders_faders[i].update();
+        tlc.write();
+    }
+
+}
+
+
 
 void pixelfaders_wait_for_fade() {
     bool fading_all_done = false;
@@ -173,6 +231,7 @@ void pixelfaders_wait_for_fade() {
     }
 }
 
+
 void pixelfaders_init(Print &out) {
     out.println(F("setup pixelFaders:"));
 
@@ -188,18 +247,12 @@ void pixelfaders_init(Print &out) {
 }
 
 void pixelfaders_welcome_fade() {
-    for (size_t i = 0; i < leds_count; i++) {
-        pixelfaders_fadeTo(i , 1000, 60000, 60000, 0);
-    }
+    pixelfaders_fadeTo_all(1000, 60000, 60000, 0);
     pixelfaders_wait_for_fade();
 
-    for (size_t i = 0; i < leds_count; i++) {
-        pixelfaders_fadeTo(i , 1000, 1000, 500, 1);
-    }
+    pixelfaders_fadeTo_all(1000, 1000, 500, 1);
     pixelfaders_wait_for_fade();
 
-    for (size_t i = 0; i < leds_count; i++) {
-        pixelfaders_fadeTo(i , 1000, 0, 0, 1);
-    }
+    pixelfaders_fadeTo_all(1000, 0, 0, 1);
     pixelfaders_wait_for_fade();
 }
