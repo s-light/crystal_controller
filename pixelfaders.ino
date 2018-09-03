@@ -225,10 +225,9 @@ void pixelfaders_wait_for_fade() {
                 fading_all_done = false;
             }
         }
+        tlc.write();
     }
-    for (size_t i = 0; i < leds_count; i++) {
-        pixelfaders_faders[i].update();
-    }
+    pixelfaders_update();
 }
 
 
