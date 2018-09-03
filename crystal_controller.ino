@@ -215,22 +215,33 @@ uint8_t sequencer_direction_forward = true;
 
 //
 uint16_t value_low = 1;
-uint16_t value_high = 1000;
+uint16_t value_high = 65535;
 
 
 
 const uint8_t trail_count = 8;
 const uint16_t trail[trail_count][colors_per_led] {
     //  red, green,   blue
-    {     5,     2,      0},
-    {    50,    20,      0},
-    {   500,   200,      0},
+    { 65535, 40000,      0},
+    { 55000, 10000,      0},
+    {  8000,   360,      0},
     {  1000,   360,      0},
+    { 35000, 20000,      0},
     {  3000,  1000,      0},
-    {  8000,  2900,      0},
-    { 20000,  7200,      0},
-    { 55000, 20000,      0},
+    { 55000, 30000,      0},
+    { 65535, 40000,      0},
 };
+// const uint16_t trail[trail_count][colors_per_led] {
+//     //  red, green,   blue
+//     {     5,     2,      0},
+//     {    50,    20,      0},
+//     {   500,   200,      0},
+//     {  1000,   360,      0},
+//     {  3000,  1000,      0},
+//     {  8000,  2900,      0},
+//     { 20000,  7200,      0},
+//     { 55000, 20000,      0},
+// };
 
 
 
@@ -634,7 +645,7 @@ void calculate_step__spiral() {
             if (spiral_order[column][row] == (uint8_t)sequencer_current_step) {
                 // set pixel to high
                 tlc.setChannel(ch + 0, 0);
-                tlc.setChannel(ch + 1, 0);
+                tlc.setChannel(ch + 1, value_high);
                 tlc.setChannel(ch + 2, value_high);
             }
             else {
@@ -853,13 +864,21 @@ void calculate_step__spiral2() {
     // prepare next step
     // Serial.print("sequencer_current_step: ");
     // Serial.println(sequencer_current_step);
-    const uint8_t spiral_step_count = (leds_per_column*2 * leds_per_row)-1;
+    const uint8_t spiral_step_count = (leds_per_column*1 * leds_per_row)-1;
     if (sequencer_direction_forward) {
         // forward
         if (sequencer_current_step >= spiral_step_count ) {
+            // Serial.println();
+            // Serial.print("sequencer_current_step ");
+            // Serial.print(sequencer_current_step);
+            // Serial.println();
             sequencer_current_step = sequencer_current_step - 1;
+            // sequencer_current_step = sequencer_current_step;
             sequencer_direction_forward = false;
             // Serial.println("direction switch to backwards");
+            // Serial.print("sequencer_current_step ");
+            // Serial.print(sequencer_current_step);
+            // Serial.println();
         }
         else {
             sequencer_current_step = sequencer_current_step + 1;
@@ -868,9 +887,17 @@ void calculate_step__spiral2() {
     else {
         // backwards
         if (sequencer_current_step <= (trail_count*-1) ) {
+            // Serial.println();
+            // Serial.print("sequencer_current_step ");
+            // Serial.print(sequencer_current_step);
+            // Serial.println();
             sequencer_current_step = sequencer_current_step + 1;
+            // sequencer_current_step = sequencer_current_step;
             sequencer_direction_forward = true;
             // Serial.println("direction switch to forward");
+            // Serial.print("sequencer_current_step ");
+            // Serial.print(sequencer_current_step);
+            // Serial.println();
         }
         else {
             sequencer_current_step = sequencer_current_step - 1;
@@ -1417,7 +1444,7 @@ void loop() {
     // update sub parts
 
         pixelfaders_update();
-        
+
         button.update();
 
         lowbat_check();
