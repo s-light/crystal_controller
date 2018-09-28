@@ -1,7 +1,8 @@
 # crystal_controller
 arduino based controller for LEDBoard based Crystal prop
 
-simple arduino sketch to control one [LEDBoard_4x4_16bit](https://github.com/s-light/LEDBoard_4x4_16bit) with an attached crystal
+simple arduino sketch to control one [LEDBoard_4x4_16bit](https://github.com/s-light/LEDBoard_4x4_16bit) with an attached crystal -
+for the mounting see [LEDBoard_Layouts/mounting_lightguide.md](https://github.com/s-light/LEDBoard_Layouts/blob/master/mounting_lightguide.md)
 
 connect one push button between 7 and 8.
 Single Click:
