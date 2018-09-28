@@ -214,7 +214,7 @@ uint8_t sequencer_direction_forward = true;
 
 
 //
-uint16_t value_low = 1;
+uint16_t value_low = 1000;
 uint16_t value_high = 65535;
 
 
